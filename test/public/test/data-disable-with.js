@@ -37,10 +37,32 @@ module('data-disable-with', {
       'data-url': '/echo',
       'data-disable-with': 'clicking...'
     }))
+
+    $('#qunit-fixture').append($('<div />', {
+      id: 'edit-div', 'contenteditable': 'true'
+    }))
   },
   teardown: function() {
     $(document).unbind('iframe:loaded')
   }
+})
+
+asyncTest('form button with "data-disable-with" attribute and contenteditable is not modified', 6, function() {
+  var form = $('form[data-remote]'), button = $('<button data-disable-with="submitting ..." name="submit2">Submit</button>')
+
+  var contenteditable_div = $('#qunit-fixture').find('div')
+  form.append(button)
+  contenteditable_div.append(form)
+
+  App.checkEnabledState(button, 'Submit')
+
+  setTimeout(function() {
+    App.checkEnabledState(button, 'Submit')
+    start()
+  }, 13)
+  form.triggerNative('submit')
+
+  App.checkEnabledState(button, 'Submit')
 })
 
 asyncTest('form input field with "data-disable-with" attribute', 7, function() {

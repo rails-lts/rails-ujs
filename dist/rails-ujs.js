@@ -50,6 +50,22 @@
         return element[expando][key] = value;
       };
 
+      Rails.isContentEditable = function(element) {
+        var isEditable;
+        isEditable = false;
+        while (true) {
+          if (element.isContentEditable) {
+            isEditable = true;
+            break;
+          }
+          element = element.parentElement;
+          if (!element) {
+            break;
+          }
+        }
+        return isEditable;
+      };
+
       Rails.$ = function(selector) {
         return Array.prototype.slice.call(document.querySelectorAll(selector));
       };
@@ -352,13 +368,16 @@
 
     }).call(this);
     (function() {
-      var disableFormElement, disableFormElements, disableLinkElement, enableFormElement, enableFormElements, enableLinkElement, formElements, getData, matches, setData, stopEverything;
+      var disableFormElement, disableFormElements, disableLinkElement, enableFormElement, enableFormElements, enableLinkElement, formElements, getData, isContentEditable, matches, setData, stopEverything;
 
-      matches = Rails.matches, getData = Rails.getData, setData = Rails.setData, stopEverything = Rails.stopEverything, formElements = Rails.formElements;
+      matches = Rails.matches, getData = Rails.getData, setData = Rails.setData, stopEverything = Rails.stopEverything, formElements = Rails.formElements, isContentEditable = Rails.isContentEditable;
 
       Rails.enableElement = function(e) {
         var element;
         element = e instanceof Event ? e.target : e;
+        if (isContentEditable(element)) {
+          return;
+        }
         if (matches(element, Rails.linkDisableSelector)) {
           return enableLinkElement(element);
         } else if (matches(element, Rails.buttonDisableSelector) || matches(element, Rails.formEnableSelector)) {
@@ -371,6 +390,9 @@
       Rails.disableElement = function(e) {
         var element;
         element = e instanceof Event ? e.target : e;
+        if (isContentEditable(element)) {
+          return;
+        }
         if (matches(element, Rails.linkDisableSelector)) {
           return disableLinkElement(element);
         } else if (matches(element, Rails.buttonDisableSelector) || matches(element, Rails.formDisableSelector)) {
@@ -443,15 +465,20 @@
 
     }).call(this);
     (function() {
-      var stopEverything;
+      var isContentEditable, stopEverything;
 
       stopEverything = Rails.stopEverything;
+
+      isContentEditable = Rails.isContentEditable;
 
       Rails.handleMethod = function(e) {
         var csrfParam, csrfToken, form, formContent, href, link, method;
         link = this;
         method = link.getAttribute('data-method');
         if (!method) {
+          return;
+        }
+        if (isContentEditable(this)) {
           return;
         }
         href = Rails.href(link);
@@ -475,10 +502,10 @@
 
     }).call(this);
     (function() {
-      var ajax, fire, getData, isCrossDomain, isRemote, matches, serializeElement, setData, stopEverything,
+      var ajax, fire, getData, isContentEditable, isCrossDomain, isRemote, matches, serializeElement, setData, stopEverything,
         slice = [].slice;
 
-      matches = Rails.matches, getData = Rails.getData, setData = Rails.setData, fire = Rails.fire, stopEverything = Rails.stopEverything, ajax = Rails.ajax, isCrossDomain = Rails.isCrossDomain, serializeElement = Rails.serializeElement;
+      matches = Rails.matches, getData = Rails.getData, setData = Rails.setData, fire = Rails.fire, stopEverything = Rails.stopEverything, ajax = Rails.ajax, isCrossDomain = Rails.isCrossDomain, serializeElement = Rails.serializeElement, isContentEditable = Rails.isContentEditable;
 
       isRemote = function(element) {
         var value;
@@ -493,6 +520,10 @@
           return true;
         }
         if (!fire(element, 'ajax:before')) {
+          fire(element, 'ajax:stopped');
+          return false;
+        }
+        if (isContentEditable(element)) {
           fire(element, 'ajax:stopped');
           return false;
         }

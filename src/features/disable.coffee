@@ -1,10 +1,14 @@
 #= require_tree ../utils
 
-{ matches, getData, setData, stopEverything, formElements } = Rails
+{ matches, getData, setData, stopEverything, formElements, isContentEditable } = Rails
 
 # Unified function to enable an element (link, button and form)
 Rails.enableElement = (e) ->
   element = if e instanceof Event then e.target else e
+
+  if isContentEditable(element)
+    return
+
   if matches(element, Rails.linkDisableSelector)
     enableLinkElement(element)
   else if matches(element, Rails.buttonDisableSelector) or matches(element, Rails.formEnableSelector)
@@ -15,6 +19,10 @@ Rails.enableElement = (e) ->
 # Unified function to disable an element (link, button and form)
 Rails.disableElement = (e) ->
   element = if e instanceof Event then e.target else e
+
+  if isContentEditable(element)
+    return
+
   if matches(element, Rails.linkDisableSelector)
     disableLinkElement(element)
   else if matches(element, Rails.buttonDisableSelector) or matches(element, Rails.formDisableSelector)

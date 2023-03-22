@@ -4,7 +4,8 @@
   matches, getData, setData
   fire, stopEverything
   ajax, isCrossDomain
-  serializeElement
+  serializeElement,
+  isContentEditable
 } = Rails
 
 # Checks "data-remote" if true to handle the request through a XHR request.
@@ -20,6 +21,11 @@ Rails.handleRemote = (e) ->
   unless fire(element, 'ajax:before')
     fire(element, 'ajax:stopped')
     return false
+
+  if isContentEditable(element)
+    fire(element, 'ajax:stopped')
+    return false
+
 
   withCredentials = element.getAttribute('data-with-credentials')
   dataType = element.getAttribute('data-type') or 'script'

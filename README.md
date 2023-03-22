@@ -1,3 +1,7 @@
+# Rails LTS Fork
+
+Please see [LTS](LTS) for details.
+
 Ruby on Rails unobtrusive scripting adapter.
 ========================================
 
